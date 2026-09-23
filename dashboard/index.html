@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Information Diet</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+    <!-- =========================
+         左侧导航
+    ========================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-title">
+                AI网页浏览分析助手
+            </div>
+
+        </div>
+
+
+        <nav class="nav">
+
+            <button
+                class="nav-item active"
+                data-page="overview"
+            >
+                <span>◉</span>
+            总览
+            </button>
+
+            <button
+                 class="nav-item"
+                 data-page="report"
+>      
+                  <span>▧</span>
+                每日报告
+                 </button>
+
+
+            <button
+                class="nav-item"
+                data-page="information"
+            >
+                <span>▤</span>
+            我的浏览
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-page="interests"
+            >
+                <span>◈</span>
+            兴趣分析
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-page="trends"
+            >
+                <span>⌁</span>
+            趋势
+            </button>
+
+            <button 
+                class="nav-item"
+                data-page="agent"><span>✦</span>
+            AI Agent
+            </button>
+
+            <button class="nav-item" data-page="settings"><span>⚙</span>
+            设置</button>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div>
+                Personal Agent
+            </div>
+
+            <span>
+                By Fang Cheng
+            </span>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =========================
+         主区域
+    ========================== -->
+
+    <main class="main">
+
+
+        <!-- 顶部 -->
+
+        <header class="header">
+
+            <div>
+
+                <h1 id="page-title">
+                    我的信息消费
+                </h1>
+
+                <p id="today">
+                    正在加载...
+                </p >
+
+            </div>
+
+
+            <button
+                id="refresh-btn"
+                class="refresh"
+            >
+
+                ↻ 刷新数据
+
+            </button>
+
+        </header>
+
+
+
+        <!-- =========================
+             总览页面
+        ========================== -->
+
+        <section
+            id="page-overview"
+            class="page active"
+        >
+
+
+            <!-- 数据卡片 -->
+
+            <section class="cards">
+
+
+                <div class="card">
+
+                    <span>
+                        今日浏览时间
+                    </span>
+
+                    <strong id="minutes">
+                        -
+                    </strong>
+
+                    <small>
+                        分钟
+                    </small>
+
+                </div>
+
+
+                <div class="card">
+
+                    <span>
+                        浏览页面
+                    </span>
+
+                    <strong id="pages">
+                        -
+                    </strong>
+
+                    <small>
+                        个
+                    </small>
+
+                </div>
+
+
+                <div class="card">
+
+                    <span>
+                        AI 分析
+                    </span>
+
+                    <strong id="analyses">
+                        -
+                    </strong>
+
+                    <small>
+                        个页面
+                    </small>
+
+                </div>
+
+
+                <div class="card">
+
+                    <span>
+                        平均兴趣度
+                    </span>
+
+                    <strong id="interest">
+                        -
+                    </strong>
+
+                    <small>
+                        /100
+                    </small>
+
+                </div>
+
+            </section>
+
+
+
+            <section class="grid">
+
+
+                <!-- 分类 -->
+
+                <div class="panel">
+
+                    <div class="panel-title">
+
+                        <h2>
+                            信息消费结构
+                        </h2>
+
+                        <span>
+                            TODAY
+                        </span>
+
+                    </div>
+
+
+                    <div id="categories">
+
+                        正在加载...
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- 主题 -->
+
+                <div class="panel">
+
+                    <div class="panel-title">
+
+                        <h2>
+                            我正在关注什么
+                        </h2>
+
+                        <span>
+                            TOPICS
+                        </span>
+
+                    </div>
+
+
+                    <div id="topics">
+
+                        正在加载...
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- 趋势 -->
+
+            <div class="panel">
+
+                <div class="panel-title">
+
+                    <h2>
+                        最近 7 天
+                    </h2>
+
+                    <span>
+                        TREND
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="trend"
+                    class="trend"
+                >
+
+                    正在加载...
+
+                </div>
+
+            </div>
+
+
+
+            <!-- 兴趣 -->
+
+            <div class="panel">
+
+                <div class="panel-title">
+
+                    <h2>
+                        最近让我感兴趣的内容
+                    </h2>
+
+                    <span>
+                        AI ANALYSIS
+                    </span>
+
+                </div>
+
+
+                <div id="interests-list">
+
+                    正在加载...
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =========================
+             信息消费页面
+        ========================== -->
+
+        <section
+            id="page-information"
+            class="page"
+        >
+
+            <div class="panel">
+
+                <div class="panel-title">
+
+                    <h2>
+                        信息消费
+                    </h2>
+
+                    <span>
+                        BROWSING
+                    </span>
+
+                </div>
+
+
+                <div id="information-list">
+
+                    正在加载...
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             兴趣页面
+        ========================== -->
+
+        <section
+            id="page-interests"
+            class="page"
+        >
+
+            <div class="panel">
+
+                <div class="panel-title">
+
+                    <h2>
+                        我的兴趣画像
+                    </h2>
+
+                    <span>
+                        INTERESTS
+                    </span>
+
+                </div>
+
+
+                <div id="interest-analysis">
+
+                    正在加载...
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             趋势页面
+        ========================== -->
+
+        <section
+            id="page-trends"
+            class="page"
+        >
+
+            <div class="panel">
+
+                <div class="panel-title">
+
+                    <h2>
+                        信息消费趋势
+                    </h2>
+
+                    <span>
+                        7 DAYS
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="trend-large"
+                    class="trend"
+                >
+
+                    正在加载...
+
+                </div>
+
+            </div>
+
+        </section>
+        <section id="page-agent" class="page">
+
+   
+
+    <div class="agent-layout">
+
+        <div class="agent-questions">
+
+            <div class="agent-title">
+                快捷提问
+            </div>
+
+            <button class="quick-question">
+                我最近到底在关注什么？
+            </button>
+
+            <button class="quick-question">
+                我最近是不是一直在看 AI？
+            </button>
+
+            <button class="quick-question">
+                我最近的信息消费有什么特点？
+            </button>
+
+            <button class="quick-question">
+                我今天看了哪些值得关注的内容？
+            </button>
+
+            <button class="quick-question">
+                我的兴趣是不是越来越集中？
+            </button>
+
+        </div>
+
+
+        <div class="agent-chat">
+
+            <div
+                id="chat-messages"
+                class="chat-messages"
+            >
+
+                <div class="agent-message">
+
+                    <div class="message-label">
+                        AI Agent
+                    </div>
+
+                    <div class="message-content">
+                        我已经准备好了。
+
+                        <br>
+
+                        你可以问我关于自己最近信息消费的问题。
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="agent-input-area">
+
+                <textarea
+                    id="agent-input"
+                    placeholder="例如：我最近到底在关注什么？"
+                    rows="2"
+                ></textarea>
+
+                <button
+                    id="agent-send"
+                >
+                    发送
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section id="page-settings" class="page">
+
+    <div class="settings-container">
+
+        <div class="settings-card">
+
+            <div class="settings-card-title">
+                API 配置
+            </div>
+
+            <div class="settings-card-description">
+                配置 AI 服务，用于网页分析、兴趣分析和 AI Agent。
+            </div>
+
+            <div class="settings-form">
+
+                <label>
+                    AI 服务商
+                </label>
+
+                <select id="api-provider">
+                    <option value="DeepSeek">
+                        DeepSeek
+                    </option>
+                </select>
+
+                <label>
+                    API Key
+                </label>
+
+                <div class="api-key-wrapper">
+
+                    <input
+                        id="api-key-input"
+                        type="password"
+                        placeholder="请输入 DeepSeek API Key"
+                    >
+
+                    <button
+                        id="api-key-toggle"
+                        type="button"
+                    >
+                        显示
+                    </button>
+
+                </div>
+
+                <div
+                    id="api-status"
+                    class="api-status"
+                >
+                    正在检查配置……
+                </div>
+
+                <div class="settings-actions">
+
+                    <button
+                        id="api-save"
+                        class="settings-primary"
+                    >
+                        保存配置
+                    </button>
+
+                    <button
+                        id="api-test"
+                        class="settings-secondary"
+                    >
+                        测试连接
+                    </button>
+
+                    <button
+                        id="api-delete"
+                        class="settings-danger"
+                    >
+                        删除 API Key
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="settings-security">
+
+                <strong>隐私说明</strong>
+
+                <p>
+                    API Key 只保存在你的本地电脑中，
+                    不会写入网页代码，也不会上传到 GitHub。
+                </p >
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section
+    id="page-report"
+    class="page"
+>
+
+    <div class="report-container">
+
+        <div class="report-header">
+
+            <div>
+
+                <div class="report-date">
+                    TODAY
+                </div>
+
+                <h2>
+                    今日信息消费报告
+                </h2>
+
+                <p id="report-description">
+                    正在生成今天的信息消费分析……
+                </p >
+
+            </div>
+
+            <button
+                id="report-refresh"
+                class="report-refresh"
+            >
+                ↻ 重新生成
+            </button>
+
+        </div>
+
+
+        <!-- 今日概览 -->
+
+        <div class="report-stats">
+
+            <div class="report-stat">
+
+                <span>
+                    浏览页面
+                </span>
+
+                <strong id="report-pages">
+                    -
+                </strong>
+
+            </div>
+
+
+            <div class="report-stat">
+
+                <span>
+                    浏览时间
+                </span>
+
+                <strong id="report-minutes">
+                    -
+                </strong>
+
+                <small>
+                    分钟
+                </small>
+
+            </div>
+
+
+            <div class="report-stat">
+
+                <span>
+                    AI 分析
+                </span>
+
+                <strong id="report-analyses">
+                    -
+                </strong>
+
+                <small>
+                    个页面
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- 总体概览 -->
+
+        <div class="report-card">
+
+            <div class="report-card-title">
+                今日概览
+            </div>
+
+            <div
+                id="report-overview"
+                class="report-text"
+            >
+                正在分析……
+            </div>
+
+        </div>
+
+
+        <!-- 主要关注 -->
+
+        <div class="report-card">
+
+            <div class="report-card-title">
+                今天主要在关注什么
+            </div>
+
+            <div
+                id="report-focus"
+                class="report-focus"
+            >
+                正在分析……
+            </div>
+
+        </div>
+
+
+        <!-- 信息结构 -->
+
+        <div class="report-card">
+
+            <div class="report-card-title">
+                信息消费结构
+            </div>
+
+            <div
+                id="report-structure"
+                class="report-text"
+            >
+                正在分析……
+            </div>
+
+        </div>
+
+
+        <!-- 值得关注 -->
+
+        <div class="report-card">
+
+            <div class="report-card-title">
+                值得关注的内容
+            </div>
+
+            <div
+                id="report-highlights"
+                class="report-highlights"
+            >
+                正在分析……
+            </div>
+
+        </div>
+
+
+        <!-- AI 总结 -->
+
+        <div class="report-card report-insight">
+
+            <div class="report-card-title">
+                AI 对今天的总结
+            </div>
+
+            <div
+                id="report-insight"
+                class="report-text"
+            >
+                正在分析……
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+    </main>
+
+</div>
+
+
+<script src="app.js"></script>
+
+</body>
+
+</html>

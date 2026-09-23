@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "AI信息分析",
+  "version": "0.1.0",
+  "description": "记录浏览行为，用于个人信息消费分析。",
+  "permissions": [
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
+}
