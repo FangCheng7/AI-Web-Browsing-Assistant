@@ -5,12 +5,12 @@ Set-Location $root
 
 $sourceZip = Join-Path $root "release\AI-Web-Browsing-Assistant-source.zip"
 $windowsZip = Join-Path $root "release\AI-Web-Browsing-Assistant-windows.zip"
-$distDir = Join-Path $root "dist\AI网页浏览分析助手"
+$distRoot = Join-Path $root "dist"
 
 $dirty = git status --porcelain
 
 if ($dirty) {
-    throw "工作区尚未提交。请先提交源码，确保源码压缩包内容可复现。"
+    throw "The working tree is not clean. Commit source changes before packaging."
 }
 
 $trackedSensitive = git ls-files | Where-Object {
@@ -18,19 +18,29 @@ $trackedSensitive = git ls-files | Where-Object {
 }
 
 if ($trackedSensitive) {
-    throw "发现被 Git 跟踪的敏感文件：`n$($trackedSensitive -join "`n")"
+    throw "Sensitive files are tracked by Git:`n$($trackedSensitive -join "`n")"
 }
 
-if (-not (Test-Path $distDir)) {
-    throw "找不到 EXE 构建目录：$distDir"
+if (-not (Test-Path $distRoot)) {
+    throw "The dist directory was not found: $distRoot"
 }
+
+$distDirectory = Get-ChildItem $distRoot -Directory | Where-Object {
+    Get-ChildItem $_.FullName -Filter "*.exe" -File -ErrorAction SilentlyContinue
+} | Select-Object -First 1
+
+if (-not $distDirectory) {
+    throw "No packaged EXE directory was found under: $distRoot"
+}
+
+$distDir = $distDirectory.FullName
 
 $distSensitive = Get-ChildItem $distDir -Recurse -Force -File | Where-Object {
     $_.Name -match '^\.env$|\.env$|\.db$|\.sqlite$|\.key$|\.pem$'
 }
 
 if ($distSensitive) {
-    throw "EXE 构建目录中发现敏感文件：`n$($distSensitive.FullName -join "`n")"
+    throw "Sensitive files were found in the EXE package:`n$($distSensitive.FullName -join "`n")"
 }
 
 New-Item -ItemType Directory -Path (Join-Path $root "release") -Force | Out-Null
@@ -46,7 +56,7 @@ $sourceHash = (Get-FileHash $sourceZip -Algorithm SHA256).Hash
 $windowsHash = (Get-FileHash $windowsZip -Algorithm SHA256).Hash
 
 Write-Host ""
-Write-Host "发布包已生成："
+Write-Host "Release packages created:"
 Write-Host "  $sourceZip"
 Write-Host "  SHA256: $sourceHash"
 Write-Host "  $windowsZip"
