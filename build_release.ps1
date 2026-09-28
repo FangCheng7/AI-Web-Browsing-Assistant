@@ -14,6 +14,10 @@ if ($dirty) {
 }
 
 $trackedSensitive = git ls-files | Where-Object {
+    if ($_ -match '\.env\.example$') {
+        return $false
+    }
+
     $_ -match '(^|/)\.env($|\.)|\.db$|\.sqlite$|\.key$|\.pem$'
 }
 
