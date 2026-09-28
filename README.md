@@ -28,10 +28,14 @@
 
 ## 开发运行
 
-安装依赖：
+如果你下载的是 Windows 免安装包，解压后直接运行 `AI网页浏览分析助手.exe`，不需要安装 Python。
+
+如果使用源码，先创建虚拟环境并安装依赖：
 
 ```powershell
 cd C:\Users\24988\Desktop\Agent
+python -m venv backend\venv
+backend\venv\Scripts\python.exe -m pip install --upgrade pip
 backend\venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
