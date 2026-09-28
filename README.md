@@ -1,4 +1,4 @@
-# AI 网页浏览分析助手
+# 网页信息浏览分析Agent
 
 一个本地运行的「个人信息探索 Agent」桌面工具。浏览器扩展记录网页内容和浏览行为，后端使用 FastAPI、SQLite 与 DeepSeek 进行结构化分析，Dashboard 展示信息消费、兴趣趋势和 Agent 任务结果。
 
@@ -11,8 +11,6 @@
 - SQLite 长期 Memory
 - 浏览器扩展自动采集网页正文
 - 桌面 Dashboard 与 Windows EXE
-
-本项目不包含 RAG、向量数据库或联网搜索。Agent 只调用 DeepSeek API 和本地 SQLite Tool。
 
 ## 隐私与数据
 
