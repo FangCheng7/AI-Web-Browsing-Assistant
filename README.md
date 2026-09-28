@@ -33,7 +33,7 @@
 如果使用源码，先创建虚拟环境并安装依赖：
 
 ```powershell
-cd C:\Users\24988\Desktop\Agent
+Set-Location "你的项目目录"
 python -m venv backend\venv
 backend\venv\Scripts\python.exe -m pip install --upgrade pip
 backend\venv\Scripts\python.exe -m pip install -r requirements.txt
@@ -42,7 +42,7 @@ backend\venv\Scripts\python.exe -m pip install -r requirements.txt
 启动后端：
 
 ```powershell
-cd C:\Users\24988\Desktop\Agent
+Set-Location "你的项目目录"
 $env:PYTHONPATH="$PWD\backend"
 backend\venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
@@ -60,13 +60,13 @@ http://127.0.0.1:8000/dashboard/
 在 Edge 或 Chrome 的扩展管理页面启用“开发者模式”，选择“加载解压缩的扩展”，然后选择：
 
 ```text
-C:\Users\24988\Desktop\Agent\extension
+你的项目目录\extension
 ```
 
 ## 构建 EXE
 
 ```powershell
-cd C:\Users\24988\Desktop\Agent
+Set-Location "你的项目目录"
 backend\venv\Scripts\python.exe -m PyInstaller --noconfirm --clean "AI网页浏览分析助手.spec"
 ```
 
@@ -81,7 +81,7 @@ dist\AI网页浏览分析助手\AI网页浏览分析助手.exe
 先提交并推送源码，确保工作区干净，然后运行：
 
 ```powershell
-cd C:\Users\24988\Desktop\Agent
+Set-Location "你的项目目录"
 powershell -ExecutionPolicy Bypass -File .\build_release.ps1
 ```
 
@@ -95,7 +95,7 @@ powershell -ExecutionPolicy Bypass -File .\build_release.ps1
 ## 测试
 
 ```powershell
-cd C:\Users\24988\Desktop\Agent
+Set-Location "你的项目目录"
 $env:PYTHONPATH="$PWD\backend"
 backend\venv\Scripts\python.exe -m unittest discover -s backend\tests -v
 ```
