@@ -2,6 +2,10 @@ const API = "http://127.0.0.1:8000";
 
 let todayData = null;
 let weekData = null;
+let agentReady = false;
+let agentRunning = false;
+let currentAgentTask = "";
+let currentExecutionPanel = null;
 
 
 // =====================================================
@@ -622,9 +626,580 @@ function renderLargeTrend() {
     }
 
 
-    renderTrendTo(
+    renderLargeTrendDashboard(
         container
     );
+
+}
+
+
+function renderLargeTrendDashboard(container) {
+
+    const days =
+        weekData.days || [];
+
+    if (!days.length) {
+
+        container.innerHTML =
+            "<div class='empty'>暂无趋势数据</div>";
+
+        return;
+    }
+
+    const summary =
+        document.getElementById(
+            "trend-summary-grid"
+        );
+
+    const volume =
+        document.getElementById(
+            "trend-volume-chart"
+        );
+
+    const quality =
+        document.getElementById(
+            "trend-quality-chart"
+        );
+
+    const categories =
+        document.getElementById(
+            "trend-category-chart"
+        );
+
+    const insights =
+        document.getElementById(
+            "trend-insight-list"
+        );
+
+    const table =
+        document.getElementById(
+            "trend-data-table"
+        );
+
+    renderTrendSummary(
+        summary,
+        days
+    );
+
+    renderTrendVolumeChart(
+        volume,
+        days
+    );
+
+    renderTrendQualityChart(
+        quality,
+        days
+    );
+
+    renderTrendCategoryChart(
+        categories,
+        days
+    );
+
+    renderTrendInsights(
+        insights,
+        days
+    );
+
+    renderTrendTable(
+        table,
+        days
+    );
+
+}
+
+
+function renderTrendSummary(container, days) {
+
+    if (!container) {
+        return;
+    }
+
+    const totalPages =
+        days.reduce(
+            (sum, day) =>
+                sum + (Number(day.pages) || 0),
+            0
+        );
+
+    const totalMinutes =
+        days.reduce(
+            (sum, day) =>
+                sum + (Number(day.minutes) || 0),
+            0
+        );
+
+    const activeDays =
+        days.filter(
+            day => (Number(day.pages) || 0) > 0
+        ).length;
+
+    const analyzedDays =
+        days.filter(
+            day =>
+                (Number(day.ai_analyses) || 0) > 0
+        );
+
+    const averageInterest =
+        analyzedDays.length
+            ? analyzedDays.reduce(
+                (sum, day) =>
+                    sum +
+                    (Number(day.interest) || 0),
+                0
+            ) / analyzedDays.length
+            : 0;
+
+    const cards = [
+        {
+            label: "浏览页数",
+            value: totalPages,
+            unit: "页",
+            accent: "pages"
+        },
+        {
+            label: "累计时长",
+            value: totalMinutes.toFixed(1),
+            unit: "分钟",
+            accent: "minutes"
+        },
+        {
+            label: "活跃天数",
+            value: activeDays,
+            unit: "/ 7 天",
+            accent: "days"
+        },
+        {
+            label: "平均兴趣度",
+            value: averageInterest.toFixed(1),
+            unit: "/ 100",
+            accent: "interest"
+        }
+    ];
+
+    container.innerHTML =
+        cards.map(card => `
+            <article class="trend-summary-card ${card.accent}">
+                <span>${card.label}</span>
+                <strong>${card.value}</strong>
+                <small>${card.unit}</small>
+            </article>
+        `).join("");
+
+}
+
+
+function renderTrendVolumeChart(container, days) {
+
+    if (!container) {
+        return;
+    }
+
+    const width = 720;
+    const height = 250;
+    const left = 42;
+    const right = 18;
+    const top = 22;
+    const bottom = 44;
+    const innerWidth = width - left - right;
+    const innerHeight = height - top - bottom;
+    const maxValue = Math.max(
+        ...days.map(
+            day => Number(day.pages) || 0
+        ),
+        1
+    );
+    const slotWidth =
+        innerWidth / days.length;
+    const barWidth = Math.min(
+        42,
+        slotWidth * 0.48
+    );
+
+    const gridLines = [0, 0.25, 0.5, 0.75, 1]
+        .map(ratio => {
+
+            const y =
+                top + innerHeight * (1 - ratio);
+
+            const label =
+                Math.round(maxValue * ratio);
+
+            return `
+                <line
+                    x1="${left}"
+                    y1="${y}"
+                    x2="${width - right}"
+                    y2="${y}"
+                    class="trend-grid-line"
+                />
+                <text
+                    x="${left - 8}"
+                    y="${y + 4}"
+                    text-anchor="end"
+                    class="trend-axis-label"
+                >${label}</text>
+            `;
+
+        }).join("");
+
+    const bars = days.map((day, index) => {
+
+        const value =
+            Number(day.pages) || 0;
+
+        const barHeight =
+            value / maxValue * innerHeight;
+
+        const x =
+            left +
+            slotWidth * index +
+            (slotWidth - barWidth) / 2;
+
+        const y =
+            top + innerHeight - barHeight;
+
+        const labelX =
+            left + slotWidth * (index + 0.5);
+
+        return `
+            <rect
+                x="${x}"
+                y="${y}"
+                width="${barWidth}"
+                height="${Math.max(barHeight, 2)}"
+                rx="5"
+                class="trend-volume-bar"
+            />
+            <text
+                x="${labelX}"
+                y="${Math.max(y - 7, top - 5)}"
+                text-anchor="middle"
+                class="trend-value-label"
+            >${value}</text>
+            <text
+                x="${labelX}"
+                y="${height - 14}"
+                text-anchor="middle"
+                class="trend-axis-label"
+            >${escapeHTML(day.date)}</text>
+        `;
+
+    }).join("");
+
+    container.innerHTML = `
+        <svg
+            class="trend-svg"
+            viewBox="0 0 ${width} ${height}"
+            role="img"
+            aria-label="每日浏览页数柱状图"
+        >
+            ${gridLines}
+            ${bars}
+        </svg>
+    `;
+
+}
+
+
+function renderTrendQualityChart(container, days) {
+
+    if (!container) {
+        return;
+    }
+
+    const width = 720;
+    const height = 250;
+    const left = 42;
+    const right = 20;
+    const top = 26;
+    const bottom = 44;
+    const innerWidth = width - left - right;
+    const innerHeight = height - top - bottom;
+    const slotWidth =
+        innerWidth / days.length;
+
+    const buildPoints = metric =>
+        days.map((day, index) => {
+
+            const value = Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(day[metric]) || 0
+                )
+            );
+
+            const x =
+                left + slotWidth * (index + 0.5);
+
+            const y =
+                top +
+                innerHeight *
+                (1 - value / 100);
+
+            return {
+                x,
+                y,
+                value,
+                date: day.date
+            };
+
+        });
+
+    const interestPoints = buildPoints("interest");
+    const importancePoints = buildPoints("importance");
+
+    const gridLines = [0, 25, 50, 75, 100]
+        .map(value => {
+
+            const y =
+                top +
+                innerHeight *
+                (1 - value / 100);
+
+            return `
+                <line
+                    x1="${left}"
+                    y1="${y}"
+                    x2="${width - right}"
+                    y2="${y}"
+                    class="trend-grid-line"
+                />
+                <text
+                    x="${left - 8}"
+                    y="${y + 4}"
+                    text-anchor="end"
+                    class="trend-axis-label"
+                >${value}</text>
+            `;
+
+        }).join("");
+
+    const pointsToPolyline = points =>
+        points.map(point => `${point.x},${point.y}`).join(" ");
+
+    const dots = points =>
+        points.map(point => `
+            <circle
+                cx="${point.x}"
+                cy="${point.y}"
+                r="4"
+                class="trend-line-dot"
+            >
+                <title>${point.value}</title>
+            </circle>
+        `).join("");
+
+    const dateLabels = days.map((day, index) => `
+        <text
+            x="${left + slotWidth * (index + 0.5)}"
+            y="${height - 14}"
+            text-anchor="middle"
+            class="trend-axis-label"
+        >${escapeHTML(day.date)}</text>
+    `).join("");
+
+    container.innerHTML = `
+        <div class="trend-chart-legend">
+            <span><i class="interest"></i>兴趣度</span>
+            <span><i class="importance"></i>信息价值</span>
+        </div>
+        <svg
+            class="trend-svg"
+            viewBox="0 0 ${width} ${height}"
+            role="img"
+            aria-label="兴趣度和信息价值折线图"
+        >
+            ${gridLines}
+            <polyline
+                points="${pointsToPolyline(interestPoints)}"
+                class="trend-line interest"
+            />
+            <polyline
+                points="${pointsToPolyline(importancePoints)}"
+                class="trend-line importance"
+            />
+            ${dots(interestPoints)}
+            ${dots(importancePoints)}
+            ${dateLabels}
+        </svg>
+    `;
+
+}
+
+
+function renderTrendCategoryChart(container, days) {
+
+    if (!container) {
+        return;
+    }
+
+    const counts = {};
+
+    days.forEach(day => {
+
+        const category =
+            day.top_category &&
+            day.top_category !== "暂无"
+                ? day.top_category
+                : "暂无分类";
+
+        counts[category] =
+            (counts[category] || 0) + 1;
+
+    });
+
+    const rows =
+        Object.entries(counts)
+            .sort((a, b) => b[1] - a[1]);
+
+    const maxCount =
+        Math.max(
+            ...rows.map(row => row[1]),
+            1
+        );
+
+    container.innerHTML = rows.map(
+        ([category, count]) => `
+            <div class="trend-category-row">
+                <div class="trend-category-head">
+                    <strong>${escapeHTML(category)}</strong>
+                    <span>${count} 天</span>
+                </div>
+                <div class="trend-category-track">
+                    <span
+                        style="width:${count / maxCount * 100}%"
+                    ></span>
+                </div>
+            </div>
+        `
+    ).join("");
+
+}
+
+
+function renderTrendInsights(container, days) {
+
+    if (!container) {
+        return;
+    }
+
+    const activeDays =
+        days.filter(
+            day => (Number(day.pages) || 0) > 0
+        );
+
+    const mostPages =
+        days.reduce(
+            (best, day) =>
+                (Number(day.pages) || 0) >
+                (Number(best.pages) || 0)
+                    ? day
+                    : best,
+            days[0]
+        );
+
+    const mostMinutes =
+        days.reduce(
+            (best, day) =>
+                (Number(day.minutes) || 0) >
+                (Number(best.minutes) || 0)
+                    ? day
+                    : best,
+            days[0]
+        );
+
+    const categoryCounts = {};
+
+    activeDays.forEach(day => {
+
+        if (
+            day.top_category &&
+            day.top_category !== "暂无"
+        ) {
+            categoryCounts[day.top_category] =
+                (categoryCounts[day.top_category] || 0) +
+                1;
+        }
+
+    });
+
+    const dominantCategory =
+        Object.entries(categoryCounts)
+            .sort((a, b) => b[1] - a[1])[0];
+
+    const insights = [
+        {
+            label: "浏览最多的一天",
+            value: `${mostPages.date} · ${Number(mostPages.pages) || 0} 页`
+        },
+        {
+            label: "停留最久的一天",
+            value: `${mostMinutes.date} · ${Number(mostMinutes.minutes || 0).toFixed(1)} 分钟`
+        },
+        {
+            label: "出现最多的类别",
+            value: dominantCategory
+                ? `${dominantCategory[0]} · ${dominantCategory[1]} 天`
+                : "暂无足够数据"
+        },
+        {
+            label: "活跃记录",
+            value: `${activeDays.length} / ${days.length} 天`
+        }
+    ];
+
+    container.innerHTML = insights.map(
+        item => `
+            <div class="trend-insight-item">
+                <span>${item.label}</span>
+                <strong>${escapeHTML(item.value)}</strong>
+            </div>
+        `
+    ).join("");
+
+}
+
+
+function renderTrendTable(container, days) {
+
+    if (!container) {
+        return;
+    }
+
+    const rows = days.map(day => `
+        <tr>
+            <td>${escapeHTML(day.date)}</td>
+            <td>${Number(day.pages) || 0}</td>
+            <td>${Number(day.minutes || 0).toFixed(1)}</td>
+            <td>${Number(day.ai_analyses) || 0}</td>
+            <td>${Number(day.interest || 0).toFixed(1)}</td>
+            <td>${Number(day.importance || 0).toFixed(1)}</td>
+            <td>
+                <span class="trend-table-category">
+                    ${escapeHTML(day.top_category || "暂无")}
+                </span>
+            </td>
+        </tr>
+    `).join("");
+
+    container.innerHTML = `
+        <table class="trend-data-table">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>页数</th>
+                    <th>时长（分钟）</th>
+                    <th>AI 分析</th>
+                    <th>兴趣度</th>
+                    <th>信息价值</th>
+                    <th>主导类别</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
 
 }
 
@@ -735,6 +1310,44 @@ function renderTrendTo(
 // =====================================================
 // 信息消费页面
 // =====================================================
+
+function formatBrowseDate(timestamp) {
+
+    const value = Number(timestamp);
+
+    if (
+        !Number.isFinite(value) ||
+        value <= 0
+    ) {
+
+        return "日期未知";
+    }
+
+    const milliseconds =
+        value < 100000000000
+            ? value * 1000
+            : value;
+
+    const date = new Date(milliseconds);
+
+    if (Number.isNaN(date.getTime())) {
+
+        return "日期未知";
+    }
+
+    const pad = number =>
+        String(number).padStart(2, "0");
+
+    return (
+        `${date.getFullYear()}-` +
+        `${pad(date.getMonth() + 1)}-` +
+        `${pad(date.getDate())} ` +
+        `${pad(date.getHours())}:` +
+        `${pad(date.getMinutes())}`
+    );
+}
+
+
 async function renderInformation() {
 
     const container =
@@ -789,11 +1402,32 @@ async function renderInformation() {
 
                 const category =
                     record.category ||
-                    "未分析";
+                    "待分析";
 
                 const summary =
                     record.summary ||
                     "暂无摘要";
+
+                const tags =
+                    Array.isArray(record.tags)
+                        ? record.tags
+                            .filter(Boolean)
+                            .slice(0, 6)
+                        : [];
+
+                const analysisSource =
+                    record.analysis_source === "local"
+                        ? "基础分类"
+                        : (
+                            record.category
+                                ? "AI 分析"
+                                : "待分析"
+                        );
+
+                const browseDate =
+                    formatBrowseDate(
+                        record.start_time
+                    );
 
                 let hostname = "";
 
@@ -816,9 +1450,26 @@ async function renderInformation() {
                                 ${escapeHTML(title)}
                             </div>
 
-                            <div class="information-url">
+                            <div class="information-date">
+                                浏览时间：${escapeHTML(browseDate)}
+                            </div>
+
+                            <div
+                                class="information-url"
+                                title="${escapeHTML(url)}"
+                            >
                                 ${escapeHTML(hostname)}
                             </div>
+
+                            ${tags.length ? `
+                                <div class="information-tags">
+                                    ${tags.map(tag => `
+                                        <span class="information-tag">
+                                            ${escapeHTML(tag)}
+                                        </span>
+                                    `).join("")}
+                                </div>
+                            ` : ""}
 
                             <div class="information-summary">
                                 ${escapeHTML(summary)}
@@ -830,6 +1481,10 @@ async function renderInformation() {
 
                             <span class="information-category">
                                 ${escapeHTML(category)}
+                            </span>
+
+                            <span class="information-source">
+                                ${escapeHTML(analysisSource)}
                             </span>
 
                         </div>
@@ -850,66 +1505,6 @@ async function renderInformation() {
             "<div class='empty'>加载信息消费失败，请检查后端是否运行</div>";
     }
 }
-
-
-
-    container.innerHTML = "";
-
-
-    items.forEach(
-        item => {
-
-            const div =
-                document.createElement(
-                    "div"
-                );
-
-
-            div.className =
-                "info-row";
-
-
-            div.innerHTML = `
-
-                <div>
-
-                    <strong>
-
-                        ${escapeHTML(
-                            item.title ||
-                            "未命名网页"
-                        )}
-
-                    </strong>
-
-                    <p>
-
-                        ${escapeHTML(
-                            item.summary ||
-                            ""
-                        )}
-
-                    </p >
-
-                </div>
-
-
-                <div class="score">
-
-                    兴趣
-                    ${item.interest ?? 0}
-
-                </div>
-
-            `;
-
-
-            container.appendChild(
-                div
-            );
-
-        }
-    );
 
 
 
@@ -1119,27 +1714,123 @@ function setupAgent() {
 
 
     document
-        .querySelectorAll(".quick-question")
+        .querySelectorAll("[data-agent-task]")
         .forEach(button => {
 
             button.addEventListener(
                 "click",
                 function () {
 
-                    input.value =
-                        this.textContent.trim();
+                    if (
+                        agentRunning ||
+                        !agentReady
+                    ) {
+                        return;
+                    }
 
-                    sendAgentQuestion();
+                    startAgentTask(
+                        this.dataset.agentTask
+                    );
 
                 }
             );
 
         });
 
+    refreshAgentStatus();
+
 }
 
 
-async function sendAgentQuestion() {
+function sendAgentQuestion() {
+
+    const input =
+        document.getElementById("agent-input");
+
+    if (!input) {
+        return;
+    }
+
+    startAgentTask(
+        input.value.trim()
+    );
+
+}
+
+
+async function refreshAgentStatus() {
+
+    const status =
+        document.getElementById("agent-status");
+
+    const statusText =
+        document.getElementById("agent-status-text");
+
+    if (!status || !statusText) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `${API}/api/settings`
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                "Agent 状态接口不可用"
+            );
+        }
+
+        const data =
+            await response.json();
+
+        if (data.configured) {
+
+            agentReady = true;
+
+            status.className =
+                "agent-status online";
+
+            statusText.textContent =
+                "Agent Online";
+
+        } else {
+
+            agentReady = false;
+
+            status.className =
+                "agent-status offline";
+
+            statusText.textContent =
+                "未配置 DeepSeek API Key";
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "获取 Agent 状态失败:",
+            error
+        );
+
+        agentReady = false;
+
+        status.className =
+            "agent-status offline";
+
+        statusText.textContent =
+            "后端未连接";
+
+    }
+
+    updateAgentControls();
+
+}
+
+
+function updateAgentControls() {
 
     const input =
         document.getElementById("agent-input");
@@ -1147,214 +1838,569 @@ async function sendAgentQuestion() {
     const sendButton =
         document.getElementById("agent-send");
 
-    const question =
-        input.value.trim();
+    const enabled =
+        agentReady && !agentRunning;
 
-    if (!question) {
+    if (input) {
+        input.disabled = !enabled;
+    }
+
+    if (sendButton) {
+        sendButton.disabled = !enabled;
+        sendButton.textContent =
+            agentRunning
+                ? "执行中..."
+                : "执行任务";
+    }
+
+    document
+        .querySelectorAll(
+            "[data-agent-task], .agent-rerun"
+        )
+        .forEach(button => {
+            button.disabled = !enabled;
+        });
+
+}
+
+
+function setAgentTaskState(text, state) {
+
+    const element =
+        document.getElementById(
+            "agent-task-state"
+        );
+
+    if (!element) {
         return;
     }
 
+    element.textContent = text;
+    element.className =
+        `agent-task-state ${state || ""}`.trim();
 
-    addUserMessage(question);
-
-    input.value = "";
-
-    input.disabled = true;
-
-    sendButton.disabled = true;
-
-    sendButton.textContent =
-        "分析中...";
+}
 
 
-    const loading =
-        addAgentLoading();
+function setWorkflowPhase(
+    phase,
+    status,
+    detail
+) {
 
+    const item =
+        document.querySelector(
+            `[data-phase="${phase}"]`
+        );
+
+    if (!item) {
+        return;
+    }
+
+    item.className = status;
+
+    const detailElement =
+        item.querySelector("small");
+
+    if (detailElement) {
+        detailElement.textContent =
+            detail || "";
+    }
+
+}
+
+
+function startAgentTask(task) {
+
+    const normalizedTask =
+        String(task || "").trim();
+
+    if (
+        !normalizedTask ||
+        agentRunning ||
+        !agentReady
+    ) {
+        return;
+    }
+
+    runAgentTask(normalizedTask);
+
+}
+
+
+async function runAgentTask(task) {
+
+    const input =
+        document.getElementById("agent-input");
+
+    currentAgentTask = task;
+    currentExecutionPanel = null;
+    agentRunning = true;
+
+    if (input) {
+        input.value = "";
+    }
+
+    updateAgentControls();
+    setAgentTaskState(
+        "Agent 正在执行",
+        "running"
+    );
+
+    addTaskRequest(task);
+    resetAgentWorkflow();
+    setWorkflowPhase(
+        "understand",
+        "active",
+        "正在理解任务"
+    );
+    showAgentExecutionPanel();
+
+    let data = null;
 
     try {
 
         const response =
             await fetch(
-                "http://127.0.0.1:8000/api/agent/chat",
+                `${API}/api/agent/chat`,
                 {
                     method: "POST",
-
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
-
                     body: JSON.stringify({
-                        question: question
+                        question: task
                     })
                 }
             );
 
+        data = await response.json();
 
-        const data =
-            await response.json();
-
-
-        loading.remove();
-
-
-        if (
-            data.success === false
-        ) {
-
-            addAgentMessage(
+        if (!response.ok) {
+            throw new Error(
                 data.error ||
-                "Agent 分析失败。"
+                `Agent 接口错误：${response.status}`
+            );
+        }
+
+        renderAgentExecutionSteps(
+            data.execution_steps || [],
+            data.success !== false
+        );
+
+        updateAgentWorkflow(
+            data.execution_steps || [],
+            data.success !== false
+        );
+
+        if (data.success === false) {
+
+            addTaskResult(
+                task,
+                data.error ||
+                data.answer ||
+                "Agent 任务执行失败。",
+                true
             );
 
         } else {
 
-            addAgentMessage(
+            addTaskResult(
+                task,
                 data.answer ||
-                "暂时没有得到回答。"
+                "Agent 没有返回分析结果。",
+                false
             );
 
         }
 
-
     } catch (error) {
 
         console.error(
-            "Agent 请求失败:",
+            "Agent 任务执行失败:",
             error
         );
 
+        renderAgentExecutionSteps([], false);
+        updateAgentWorkflow([], false);
 
-        loading.remove();
-
-
-        addAgentMessage(
-            "无法连接 AI Agent，请确认 FastAPI 正在运行。"
+        addTaskResult(
+            task,
+            error.message ||
+            "无法连接 Agent。",
+            true
         );
+
+    } finally {
+
+        agentRunning = false;
+        setAgentTaskState("等待任务", "");
+        updateAgentControls();
+
+        if (input && agentReady) {
+            input.focus();
+        }
 
     }
 
+}
 
-    input.disabled = false;
 
-    sendButton.disabled = false;
+function resetAgentWorkflow() {
 
-    sendButton.textContent =
-        "发送";
+    document
+        .querySelectorAll(
+            ".agent-workflow-list li"
+        )
+        .forEach(item => {
 
-    input.focus();
+            item.className = "pending";
+
+            const detail =
+                item.querySelector("small");
+
+            if (detail) {
+                detail.textContent =
+                    "等待执行";
+            }
+
+        });
 
 }
 
 
-function addUserMessage(text) {
+function updateAgentWorkflow(
+    steps,
+    success
+) {
 
-    const container =
-        document.getElementById(
-            "chat-messages"
+    const tools =
+        new Set(
+            (steps || []).map(step => step.tool)
         );
 
-    const div =
-        document.createElement("div");
+    const gatherTools = new Set([
+        "get_today_stats",
+        "get_7day_trend",
+        "get_recent_browsing",
+        "get_category_stats",
+        "get_memory"
+    ]);
 
-    div.className =
-        "user-message";
+    const analyzeTools = new Set([
+        "analyze_information_bubble"
+    ]);
 
-    div.innerHTML = `
-        <div class="message-label">
-            你
-        </div>
+    const exploreTools = new Set([
+        "discover_new_topics"
+    ]);
 
-        <div class="message-content">
-            ${escapeAgentHTML(text)}
-        </div>
-    `;
+    setWorkflowPhase(
+        "understand",
+        "done",
+        "已完成"
+    );
 
-    container.appendChild(div);
+    const phases = [
+        [
+            "gather",
+            gatherTools,
+            "已获取数据"
+        ],
+        [
+            "analyze",
+            analyzeTools,
+            "已完成分析"
+        ],
+        [
+            "explore",
+            exploreTools,
+            "已生成探索方向"
+        ]
+    ];
 
-    scrollAgentChat();
+    phases.forEach(
+        ([phase, toolSet, doneText]) => {
+
+            const used = [...tools].some(
+                tool => toolSet.has(tool)
+            );
+
+            setWorkflowPhase(
+                phase,
+                used
+                    ? "done"
+                    : (success ? "skipped" : "pending"),
+                used
+                    ? doneText
+                    : (success ? "本次无需调用" : "未执行")
+            );
+
+        }
+    );
+
+    setWorkflowPhase(
+        "result",
+        success ? "done" : "pending",
+        success ? "任务已完成" : "未完成"
+    );
 
 }
 
 
-function addAgentMessage(text) {
+function showAgentExecutionPanel() {
 
     const container =
-        document.getElementById(
-            "chat-messages"
-        );
+        document.getElementById("chat-messages");
 
-    const div =
-        document.createElement("div");
-
-    div.className =
-        "agent-message";
-
-    div.innerHTML = `
-        <div class="message-label">
-            AI Agent
-        </div>
-
-        <div class="message-content">
-            ${formatAgentText(text)}
-        </div>
-    `;
-
-    container.appendChild(div);
-
-    scrollAgentChat();
-
-}
-
-
-function addAgentLoading() {
-
-    const container =
-        document.getElementById(
-            "chat-messages"
-        );
-
-    const div =
-        document.createElement("div");
-
-    div.className =
-        "agent-message agent-loading";
-
-    div.innerHTML = `
-        <div class="message-label">
-            AI Agent
-        </div>
-
-        <div class="message-content">
-            正在分析你的浏览记录……
-        </div>
-    `;
-
-    container.appendChild(div);
-
-    scrollAgentChat();
-
-    return div;
-
-}
-
-
-function formatAgentText(text) {
-
-    if (!text) {
-        return "";
+    if (!container) {
+        return;
     }
 
-    let result =
-        escapeAgentHTML(text);
+    const panel =
+        document.createElement("div");
 
-    result =
-        result.replace(
-            /\n/g,
-            "<br>"
+    panel.className = "agent-execution-panel";
+    panel.setAttribute("aria-live", "polite");
+    panel.innerHTML = `
+        <div class="agent-execution-header">
+            <div>
+                <span class="agent-execution-kicker">AGENT RUN</span>
+                <strong class="agent-execution-title">Agent 正在执行任务</strong>
+            </div>
+            <span class="agent-execution-count">规划中</span>
+        </div>
+        <div class="agent-execution-steps">
+            <div class="agent-execution-step active">
+                <span class="execution-step-icon">●</span>
+                <div>
+                    <strong>理解任务</strong>
+                    <small>正在决定需要调用的工具</small>
+                </div>
+            </div>
+        </div>
+    `;
+
+    currentExecutionPanel = panel;
+    container.appendChild(panel);
+    scrollAgentChat();
+
+}
+
+
+function renderAgentExecutionSteps(
+    executionSteps,
+    success
+) {
+
+    const panel = currentExecutionPanel;
+
+    if (!panel) {
+        return;
+    }
+
+    const title = panel.querySelector(
+        ".agent-execution-title"
+    );
+
+    const count = panel.querySelector(
+        ".agent-execution-count"
+    );
+
+    const container = panel.querySelector(
+        ".agent-execution-steps"
+    );
+
+    if (!title || !count || !container) {
+        return;
+    }
+
+    const steps =
+        Array.isArray(executionSteps)
+            ? executionSteps
+            : [];
+
+    title.textContent = success
+        ? "任务执行记录"
+        : "任务执行未完成";
+
+    count.textContent =
+        `${steps.length} 步`;
+
+    if (!steps.length) {
+
+        container.innerHTML = `
+            <div class="agent-execution-step muted">
+                <span class="execution-step-icon">○</span>
+                <div>
+                    <strong>没有工具调用记录</strong>
+                    <small>Agent 未返回 execution_steps</small>
+                </div>
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML =
+        steps.map(step => {
+
+            const status =
+                step.status === "error"
+                    ? "error"
+                    : "success";
+
+            const icon =
+                status === "error"
+                    ? "×"
+                    : "✓";
+
+            return `
+                <div class="agent-execution-step ${status}">
+                    <span class="execution-step-icon">${icon}</span>
+                    <div>
+                        <strong>
+                            ${escapeAgentHTML(
+                                describeAgentTool(step.tool)
+                            )}
+                        </strong>
+                        <small>
+                            ${escapeAgentHTML(
+                                step.tool || ""
+                            )}
+                        </small>
+                    </div>
+                </div>
+            `;
+
+        }).join("");
+
+    scrollAgentChat();
+
+}
+
+
+function describeAgentTool(toolName) {
+
+    const labels = {
+        get_today_stats: "查询今日浏览",
+        get_7day_trend: "分析 7 天趋势",
+        get_recent_browsing: "查询最近浏览",
+        get_category_stats: "分析内容类别",
+        analyze_information_bubble: "分析信息消费结构",
+        discover_new_topics: "发现新的兴趣方向",
+        save_memory: "保存用户记忆",
+        get_memory: "读取用户记忆"
+    };
+
+    return labels[toolName] || toolName || "执行工具";
+
+}
+
+
+function addTaskRequest(task) {
+
+    const container =
+        document.getElementById(
+            "chat-messages"
         );
 
-    return result;
+    const emptyState =
+        document.getElementById(
+            "agent-empty-state"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    if (emptyState) {
+        emptyState.remove();
+    }
+
+    const element =
+        document.createElement("div");
+
+    element.className = "task-request";
+
+    element.innerHTML = `
+        <div class="task-request-kicker">
+            TASK
+        </div>
+        <div class="task-request-text">
+            ${escapeAgentHTML(task)}
+        </div>
+    `;
+
+    container.appendChild(element);
+    scrollAgentChat();
+
+}
+
+
+function addTaskResult(
+    task,
+    text,
+    isError
+) {
+
+    const container =
+        document.getElementById(
+            "chat-messages"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    const result =
+        document.createElement("div");
+
+    result.className = isError
+        ? "task-result error"
+        : "task-result";
+
+    const statusTitle = isError
+        ? "任务未完成"
+        : "任务完成 ✓";
+
+    const sectionTitle = isError
+        ? "执行说明"
+        : "Agent 分析结果";
+
+    result.innerHTML = `
+        <div class="task-result-header">
+            <div>
+                <span class="task-result-kicker">
+                    ${isError ? "ERROR" : "COMPLETED"}
+                </span>
+                <strong>${statusTitle}</strong>
+            </div>
+            <button class="agent-rerun" type="button">
+                重新执行
+            </button>
+        </div>
+        <div class="task-result-section-title">
+            ${sectionTitle}
+        </div>
+        <div class="task-result-answer"></div>
+    `;
+
+    result.querySelector(
+        ".task-result-answer"
+    ).textContent = text;
+
+    result.querySelector(
+        ".agent-rerun"
+    ).addEventListener(
+        "click",
+        () => runAgentTask(task)
+    );
+
+    container.appendChild(result);
+    updateAgentControls();
+    scrollAgentChat();
 
 }
 

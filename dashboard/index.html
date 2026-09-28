@@ -33,8 +33,30 @@
 
         <div class="brand">
 
-            <div class="brand-title">
-                AI网页浏览分析助手
+            <div class="brand-mark">
+                AI
+            </div>
+
+            <div class="brand-copy">
+
+                <div class="brand-kicker">
+                    PERSONAL INTELLIGENCE
+                </div>
+
+                <div class="brand-title">
+                    网页信息浏览分析
+                    <span>Agent</span>
+                </div>
+
+                <div class="brand-subtitle">
+                    信息消费与探索工作台
+                </div>
+
+            </div>
+
+            <div class="brand-meta">
+                <span class="brand-meta-dot"></span>
+                Local Workspace
             </div>
 
         </div>
@@ -48,6 +70,14 @@
             >
                 <span>◉</span>
             总览
+            </button>
+
+            <button
+                class="nav-item"
+                data-page="agent"
+            >
+                <span>✦</span>
+            AI Agent
             </button>
 
             <button
@@ -83,12 +113,6 @@
             >
                 <span>⌁</span>
             趋势
-            </button>
-
-            <button 
-                class="nav-item"
-                data-page="agent"><span>✦</span>
-            AI Agent
             </button>
 
             <button class="nav-item" data-page="settings"><span>⚙</span>
@@ -453,10 +477,102 @@
 
                 <div
                     id="trend-large"
-                    class="trend"
+                    class="trend-dashboard"
                 >
 
-                    正在加载...
+                    <div
+                        id="trend-summary-grid"
+                        class="trend-summary-grid"
+                    ></div>
+
+                    <div class="trend-chart-grid">
+
+                        <section class="trend-chart-card">
+
+                            <div class="trend-card-header">
+                                <div>
+                                    <span>VOLUME</span>
+                                    <h3>每日浏览页数</h3>
+                                </div>
+                                <small>过去 7 天</small>
+                            </div>
+
+                            <div
+                                id="trend-volume-chart"
+                                class="trend-chart-body"
+                            ></div>
+
+                        </section>
+
+                        <section class="trend-chart-card">
+
+                            <div class="trend-card-header">
+                                <div>
+                                    <span>QUALITY</span>
+                                    <h3>兴趣度与信息价值</h3>
+                                </div>
+                                <small>0 - 100</small>
+                            </div>
+
+                            <div
+                                id="trend-quality-chart"
+                                class="trend-chart-body"
+                            ></div>
+
+                        </section>
+
+                        <section class="trend-chart-card">
+
+                            <div class="trend-card-header">
+                                <div>
+                                    <span>CATEGORIES</span>
+                                    <h3>每日主导类别</h3>
+                                </div>
+                                <small>按天数统计</small>
+                            </div>
+
+                            <div
+                                id="trend-category-chart"
+                                class="trend-category-chart"
+                            ></div>
+
+                        </section>
+
+                        <section class="trend-chart-card">
+
+                            <div class="trend-card-header">
+                                <div>
+                                    <span>INSIGHTS</span>
+                                    <h3>本周观察</h3>
+                                </div>
+                                <small>数据摘要</small>
+                            </div>
+
+                            <div
+                                id="trend-insight-list"
+                                class="trend-insight-list"
+                            ></div>
+
+                        </section>
+
+                    </div>
+
+                    <section class="trend-table-card">
+
+                        <div class="trend-card-header">
+                            <div>
+                                <span>DETAILS</span>
+                                <h3>每日明细</h3>
+                            </div>
+                            <small>用于核对每日数据</small>
+                        </div>
+
+                        <div
+                            id="trend-data-table"
+                            class="trend-table-wrap"
+                        ></div>
+
+                    </section>
 
                 </div>
 
@@ -465,80 +581,197 @@
         </section>
         <section id="page-agent" class="page">
 
-   
+    <div class="agent-page">
 
-    <div class="agent-layout">
+        <header class="agent-hero">
 
-        <div class="agent-questions">
-
-            <div class="agent-title">
-                快捷提问
+            <div class="agent-hero-copy">
+                <div class="agent-eyebrow">AI Agent</div>
+                <h2>个人信息探索助手</h2>
+                <p>理解你的信息消费，并主动帮你探索新的内容。</p>
             </div>
-
-            <button class="quick-question">
-                我最近到底在关注什么？
-            </button>
-
-            <button class="quick-question">
-                我最近是不是一直在看 AI？
-            </button>
-
-            <button class="quick-question">
-                我最近的信息消费有什么特点？
-            </button>
-
-            <button class="quick-question">
-                我今天看了哪些值得关注的内容？
-            </button>
-
-            <button class="quick-question">
-                我的兴趣是不是越来越集中？
-            </button>
-
-        </div>
-
-
-        <div class="agent-chat">
 
             <div
-                id="chat-messages"
-                class="chat-messages"
+                id="agent-status"
+                class="agent-status checking"
+                aria-live="polite"
             >
+                <span class="agent-status-dot"></span>
+                <div>
+                    <strong>Agent 状态</strong>
+                    <span id="agent-status-text">正在检查连接...</span>
+                </div>
+            </div>
 
-                <div class="agent-message">
+        </header>
 
-                    <div class="message-label">
-                        AI Agent
-                    </div>
+        <div class="agent-workspace">
 
-                    <div class="message-content">
-                        我已经准备好了。
+            <aside class="agent-tasks-panel">
 
-                        <br>
-
-                        你可以问我关于自己最近信息消费的问题。
-                    </div>
-
+                <div class="agent-panel-heading">
+                    <h3>Agent 能做什么</h3>
+                    <p>选择一个任务，Agent 会自主决定需要调用的工具。</p>
                 </div>
 
-            </div>
-
-
-            <div class="agent-input-area">
-
-                <textarea
-                    id="agent-input"
-                    placeholder="例如：我最近到底在关注什么？"
-                    rows="2"
-                ></textarea>
-
                 <button
-                    id="agent-send"
+                    class="agent-task-card"
+                    data-agent-task="分析一下我最近的信息消费，看看内容结构、关注重点和集中程度。"
+                    disabled
                 >
-                    发送
+                    <span class="agent-task-icon">◉</span>
+                    <span class="agent-task-copy">
+                        <strong>分析我的信息消费</strong>
+                        <span>查看近期关注重点、内容结构和集中程度。</span>
+                    </span>
+                    <span class="agent-task-action">开始任务 →</span>
                 </button>
 
-            </div>
+                <button
+                    class="agent-task-card"
+                    data-agent-task="发现我的信息盲区：根据我的浏览历史，分析我较少接触的主题和类别。"
+                    disabled
+                >
+                    <span class="agent-task-icon">◎</span>
+                    <span class="agent-task-copy">
+                        <strong>发现我的信息盲区</strong>
+                        <span>找出浏览中较少出现的主题和内容领域。</span>
+                    </span>
+                    <span class="agent-task-action">开始任务 →</span>
+                </button>
+
+                <button
+                    class="agent-task-card"
+                    data-agent-task="根据我的近期浏览，寻找 3 个我可能感兴趣但还没有深入了解的方向。"
+                    disabled
+                >
+                    <span class="agent-task-icon">✦</span>
+                    <span class="agent-task-copy">
+                        <strong>探索新的兴趣方向</strong>
+                        <span>基于真实兴趣生成相邻但未充分接触的方向。</span>
+                    </span>
+                    <span class="agent-task-action">开始任务 →</span>
+                </button>
+
+                <button
+                    class="agent-task-card"
+                    data-agent-task="总结我今天看了什么，以及今天的信息消费重点。"
+                    disabled
+                >
+                    <span class="agent-task-icon">▤</span>
+                    <span class="agent-task-copy">
+                        <strong>总结今天</strong>
+                        <span>汇总今天浏览的内容、主题和信息价值。</span>
+                    </span>
+                    <span class="agent-task-action">开始任务 →</span>
+                </button>
+
+                <div class="agent-memory-entry">
+                    <div class="agent-memory-title">Agent Memory</div>
+                    <p>读取你在任务中明确保存的长期兴趣、偏好和目标。</p>
+                    <button
+                        class="agent-memory-button"
+                        data-agent-task="请读取你保存的长期记忆，告诉我你记得我的哪些兴趣、偏好、目标或长期要求。"
+                        disabled
+                    >
+                        读取 Memory →
+                    </button>
+                </div>
+
+            </aside>
+
+            <main class="agent-main-panel">
+
+                <div class="agent-main-header">
+                    <div>
+                        <span class="agent-main-label">TASK CONSOLE</span>
+                        <h3>任务工作台</h3>
+                    </div>
+                    <span id="agent-task-state" class="agent-task-state">等待任务</span>
+                </div>
+
+                <div
+                    id="chat-messages"
+                    class="chat-messages"
+                    aria-live="polite"
+                >
+                    <div id="agent-empty-state" class="agent-empty-state">
+                        <div class="agent-empty-mark">✦</div>
+                        <h3>今天想让 Agent 帮你完成什么？</h3>
+                        <p>
+                            给出一个目标，Agent 会按需查询真实浏览数据、
+                            分析信息结构，并基于历史数据发现新的方向。
+                        </p>
+
+                        <div class="agent-task-chips">
+                            <button class="agent-task-chip" data-agent-task="分析一下我最近的信息消费。" disabled>分析信息消费</button>
+                            <button class="agent-task-chip" data-agent-task="发现我的信息盲区。" disabled>发现信息盲区</button>
+                            <button class="agent-task-chip" data-agent-task="探索新的兴趣方向。" disabled>探索新方向</button>
+                            <button class="agent-task-chip" data-agent-task="总结我今天的信息消费。" disabled>总结今天</button>
+                        </div>
+
+                        <div class="agent-discovery-entry">
+                            <div>
+                                <strong>✦ 主动发现</strong>
+                                <p>
+                                    让 Agent 根据你的信息消费，主动寻找你还没有关注但可能感兴趣的方向。
+                                </p>
+                            </div>
+                            <button
+                                class="agent-discovery-button"
+                                data-agent-task="根据我的近期兴趣，主动寻找 3 个我可能感兴趣但最近没有深入接触的方向，并说明推荐依据。"
+                                disabled
+                            >
+                                开始探索 →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="agent-input-area">
+                    <div class="agent-input-meta">
+                        Agent 会基于真实 SQLite 数据按需调用工具。
+                    </div>
+                    <textarea
+                        id="agent-input"
+                        placeholder="输入一个任务，例如：分析我最近的信息消费，并给出探索建议。"
+                        rows="2"
+                        disabled
+                    ></textarea>
+                    <button id="agent-send" disabled>执行任务</button>
+                </div>
+
+            </main>
+
+            <aside class="agent-workflow-panel">
+                <div class="agent-panel-heading">
+                    <h3>Agent Workflow</h3>
+                    <p>根据本次真实工具调用更新，不预演未发生的步骤。</p>
+                </div>
+
+                <ol id="agent-workflow-list" class="agent-workflow-list">
+                    <li data-phase="understand" class="pending">
+                        <span class="workflow-dot"></span>
+                        <div><strong>理解任务</strong><small>等待任务</small></div>
+                    </li>
+                    <li data-phase="gather" class="pending">
+                        <span class="workflow-dot"></span>
+                        <div><strong>获取信息</strong><small>等待执行</small></div>
+                    </li>
+                    <li data-phase="analyze" class="pending">
+                        <span class="workflow-dot"></span>
+                        <div><strong>分析数据</strong><small>等待执行</small></div>
+                    </li>
+                    <li data-phase="explore" class="pending">
+                        <span class="workflow-dot"></span>
+                        <div><strong>主动探索</strong><small>等待执行</small></div>
+                    </li>
+                    <li data-phase="result" class="pending">
+                        <span class="workflow-dot"></span>
+                        <div><strong>生成结果</strong><small>等待执行</small></div>
+                    </li>
+                </ol>
+            </aside>
 
         </div>
 

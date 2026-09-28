@@ -19,6 +19,10 @@ venv/
 build/
 dist/
 *.spec
+!AI网页浏览分析助手.spec
+
+# Release packages
+release/
 
 # IDE
 .vscode/

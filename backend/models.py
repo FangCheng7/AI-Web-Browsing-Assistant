@@ -39,10 +39,32 @@ class PageAnalysis(Base):
 
     topics = Column(Text)
 
+    tags = Column(Text)
+
     summary = Column(Text)
 
     interest = Column(Integer)
 
     importance = Column(Integer)
 
+    analysis_source = Column(String(20), default="ai")
+
     created_at = Column(Integer)
+
+
+class AgentMemory(Base):
+    __tablename__ = "agent_memories"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    memory_type = Column(
+        String(50),
+        default="preference",
+        index=True
+    )
+
+    content = Column(Text, nullable=False)
+
+    created_at = Column(Integer)
+
+    updated_at = Column(Integer)

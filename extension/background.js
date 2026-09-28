@@ -203,7 +203,7 @@ async function startPage(tab) {
 
         if (
             result.success &&
-            result.recorded
+            result.browse_record_id
         ) {
 
             currentPage.browseRecordId =
@@ -373,27 +373,7 @@ chrome.runtime.onMessage.addListener(
         // 数据库记录还没创建完成
         // 稍后重试
 
-        if (!currentPage.browseRecordId) {
-
-            console.log(
-                "等待 BrowseRecord ID..."
-            );
-
-
-            setTimeout(() => {
-
-                sendPageContent(
-                    message.data,
-                    tab.id
-                );
-
-            }, 500);
-
-            return;
-        }
-
-
-        sendPageContent(
+        sendPageContentWhenReady(
             message.data,
             tab.id
         );
@@ -404,6 +384,49 @@ chrome.runtime.onMessage.addListener(
 // =========================================================
 // 发送网页内容给后端
 // =========================================================
+
+function sendPageContentWhenReady(
+    pageData,
+    tabId,
+    attempt = 0
+) {
+
+    if (
+        currentPage &&
+        currentPage.tabId === tabId &&
+        currentPage.browseRecordId
+    ) {
+
+        sendPageContent(
+            pageData,
+            tabId
+        );
+
+        return;
+    }
+
+
+    if (attempt >= 8) {
+
+        console.log(
+            "等待 BrowseRecord ID 超时"
+        );
+
+        return;
+    }
+
+
+    setTimeout(() => {
+
+        sendPageContentWhenReady(
+            pageData,
+            tabId,
+            attempt + 1
+        );
+
+    }, 500);
+}
+
 
 function sendPageContent(
     pageData,

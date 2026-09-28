@@ -1,5 +1,5 @@
 from pathlib import Path
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 APP_NAME = "AI网页浏览分析助手"
@@ -24,3 +24,34 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
+
+def ensure_schema():
+    """Add columns introduced after the first release."""
+
+    inspector = inspect(engine)
+
+    if "page_analyses" not in inspector.get_table_names():
+        return
+
+    columns = {
+        column["name"]
+        for column in inspector.get_columns("page_analyses")
+    }
+
+    with engine.begin() as connection:
+        if "tags" not in columns:
+            connection.execute(
+                text(
+                    "ALTER TABLE page_analyses "
+                    "ADD COLUMN tags TEXT"
+                )
+            )
+
+        if "analysis_source" not in columns:
+            connection.execute(
+                text(
+                    "ALTER TABLE page_analyses "
+                    "ADD COLUMN analysis_source VARCHAR(20)"
+                )
+            )
